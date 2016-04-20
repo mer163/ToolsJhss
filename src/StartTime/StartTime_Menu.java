@@ -118,12 +118,8 @@ public class StartTime_Menu extends JFrame
 	        box1.setBounds(320, 510, 120, 25);  
 	        frame.add(box1); 
 	        
-	        
-	        
-	        
 	        //将下拉列表框放入表格编辑器  
-	
-		    
+
 			button1.addActionListener(new ActionListener(){//匿名类实现ActionListener接口
 				public void actionPerformed(ActionEvent e){	
 					new Thread(new Runnable() {
@@ -258,9 +254,6 @@ public class StartTime_Menu extends JFrame
 			  }
 			
 
-		
-		
-		
 	public static void StartTime() throws Exception{
 		
 		StartTime_Menu m=new StartTime_Menu();

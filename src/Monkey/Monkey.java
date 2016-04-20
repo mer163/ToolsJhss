@@ -200,8 +200,7 @@ public class Monkey {
             String line = null;
             while ((line = br.readLine()) != null) {
             	if("".equals(line.trim())) continue;
-            
-//              text.append(line+"\n");
+            	
                 writer.write(line+"\r\n");
                 totalLog.append(line+"\n");
                 if(line.startsWith("CRASH: " + pkgname)){
@@ -224,12 +223,13 @@ public class Monkey {
                   }
                 
                 if ((flag.booleanValue()) && 
-                        (line.startsWith("// ")) && (!(line.equalsIgnoreCase("// Monkey finished")))) {
-                        text.append(line + "\n");
-                        crashLog.append(line + "\n");
-                        writer1.write(line + "\r\n");
-                      }
+                    (line.startsWith("// ")) && (!(line.equalsIgnoreCase("// Monkey finished")))) {
+                    text.append(line + "\n");
+                    crashLog.append(line + "\n");
+                    writer1.write(line + "\r\n");
+                	}
             }
+            goBackIfWebViewOccored();
             if (success)
                 if (flag.booleanValue()) {
                   text.append("本次monkey结束，检测到应用崩溃，请查看日志。\n");
@@ -262,7 +262,18 @@ public class Monkey {
        
     }
 	
-
+	public static void goBackIfWebViewOccored() throws IOException, InterruptedException{
+		while (true)
+	    {
+	      Check check = new Check();
+	      Thread ck = new Thread(check);
+	      ck.start();
+	      Thread.sleep(3000L);
+	    }
+	}
+	
+	
+	
 	public static String Monkey( String DevicesName,String PackageName ,String zscount,String throttle,String anyevent,String touch,String motion,String trackball,String syskeys,String appswitch,String count,String path) throws InterruptedException{
 		Runtime runtime1 = Runtime.getRuntime();
 		String errorMSG = "";
@@ -371,13 +382,9 @@ public class Monkey {
 	
 	public static ArrayList<String> getDevices() throws IOException{
 		ArrayList<String> devices = new ArrayList<String>();
-//		System.out.println(devices.size());
-	
-		try{
-			   
+		try{  
 		    Runtime runtime = Runtime.getRuntime();
 		    Process proc = runtime.exec("adb devices");
-    
 		    try {
 		        if (proc.waitFor() != 0) {
 		            System.err.println("exit value = " + proc.exitValue());
@@ -388,12 +395,8 @@ public class Monkey {
 		        String line = null;
 		        while ((line = in.readLine()) != null) {
 		            stringBuffer.append(line+" ");
-	            
 		        }
 		    String str1=stringBuffer.toString();  
-//		    System.out.println("line:"+str1);
-		    
-//		    System.out.println(str1);
 		    //判断是否有设备连接。
 		    if(str1.contains("device ")){
 //		    	System.out.println("有设备链接");
@@ -407,7 +410,6 @@ public class Monkey {
 				    }
 		    }
 		    else{
-		    	
 		    	return null;
 		    }
 		
@@ -422,19 +424,12 @@ public class Monkey {
 			}finally{
 				System.out.println("OK");
 			}
-//			catch (Exception ArrayIndexOutOfBoundsException)
-//			{
-//				
-//				System.out.print("请检查设备是否连接");
-//				
-//				return devices;
-//			}
 		return devices;
 		
 	}
 
 
-	}
+}
 
   
 
