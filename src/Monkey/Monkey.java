@@ -19,6 +19,7 @@ import javax.swing.JTextArea;
 
 import Monitor.Menu;
 import Outlog.log;
+import Utils.ShellUtils;
 
 
 public class Monkey {
@@ -30,7 +31,8 @@ public class Monkey {
 		//Monkey(" ", "com.taobao.taobao", "500", "", "", "", "", "", "", "500","D:/log8.txt");
 //		System.out.println(getMonkeyPid("192.168.56.101:5555"));
 //		killMonkey("192.168.56.101:5555", getMonkeyPid("192.168.56.101:5555"));
-		System.out.println(getDevices());
+		System.out.println(Monkey_Menu.getFocusedPackageAndActivity());
+
 	}
 
 	public static void killMonkey(String DevicesName,String pid) throws IOException{
@@ -159,21 +161,19 @@ public class Monkey {
 	
 	/**
 	 * 
-	 * @param command
-	 * @return 返回一个String数组， 第一位代表完整内容，第二位为crash内容。
+	 * @param
+	 * @return
 	 */
 	public static void getCrash(String command,String pkgname,JTextArea text)
     {
+		Process p;
         BufferedReader br = null;
-        StringBuffer totalLog = new StringBuffer();
-        StringBuffer crashLog = new StringBuffer();
-        
+
         String path = Monkey_Menu.path; //获取页面上的日志路径。
         Boolean flag = false;
         Boolean success = false;
-        
-        String[] ret = new String[2];
-        String str2 = null;
+		Writer log_writer, crash_writer;
+
         String time = Outlog.log.time();
         //判断目录是否存在，不存在则手动创建
         if(!(new File(path).isDirectory())){
@@ -186,34 +186,37 @@ public class Monkey {
         	new File(path+"Crash_log/").mkdir();
         }
         
-        File file = new File(path + "Monkey_log" + File.separator + log.time() + ".txt");
+        File logFile = new File(path + "Monkey_log" + File.separator + log.time() + ".txt");
         File crashFile = new File(path +"Crash_log" + File.separator +log.time() + ".txt");
-        
+
+
+
         try {
 
-        	Process p = Runtime.getRuntime().exec(command);    
+        	p = Runtime.getRuntime().exec(command);
             br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            Writer writer = new OutputStreamWriter(
-            		new FileOutputStream(file,true),"UTF-8");
-            Writer writer1 = new OutputStreamWriter(new FileOutputStream(crashFile,true),"UTF-8");
-            
+			log_writer = new OutputStreamWriter(new FileOutputStream(logFile,true),"UTF-8");
+			crash_writer = new OutputStreamWriter(new FileOutputStream(crashFile,true),"UTF-8");
+
+
+			goBackIfWebViewOccored();
+            Thread.sleep(5000L);
             String line = null;
             while ((line = br.readLine()) != null) {
             	if("".equals(line.trim())) continue;
             	
-                writer.write(line+"\r\n");
-                totalLog.append(line+"\n");
+                log_writer.write(line+"\r\n");
                 if(line.startsWith("CRASH: " + pkgname)){
                 	text.append("应用：" + pkgname + "crash发生，开始捕捉崩溃日志。\n" );
                 	text.append("----------------------------\n");
                 	text.append(line + "\n");
-                	writer1.write("应用：" + pkgname + " crash发生，开始捕捉崩溃日志。 \n" + "-----------------------------");
-                	writer1.write(line+"\r\n");
+                	crash_writer.write("应用：" + pkgname + " crash发生，开始捕捉崩溃日志。 \n" + "-----------------------------");
+                	crash_writer.write(line+"\r\n");
                 	flag = true;
 	
                 }
                 else if (line.equalsIgnoreCase("// Monkey finished")) {
-                    success = Boolean.valueOf(true);
+                    success = true;
                   }
 
                 else if (line.startsWith("## Network stats:")) {
@@ -225,26 +228,25 @@ public class Monkey {
                 if ((flag.booleanValue()) && 
                     (line.startsWith("// ")) && (!(line.equalsIgnoreCase("// Monkey finished")))) {
                     text.append(line + "\n");
-                    crashLog.append(line + "\n");
-                    writer1.write(line + "\r\n");
+					crash_writer.write(line + "\r\n");
                 	}
             }
-            goBackIfWebViewOccored();
+
             if (success)
-                if (flag.booleanValue()) {
+                if (flag ){
                   text.append("本次monkey结束，检测到应用崩溃，请查看日志。\n");
-                  writer.write("本次monkey结束，检测到应用崩溃，请查看日志。\n");
+                  log_writer.write("本次monkey结束，检测到应用崩溃，请查看日志。\n");
                 } else {
                   text.append("本次monkey结束，未发生崩溃，请查看日志。\n");
-                  writer.write("本次monkey结束，未发生崩溃，请查看日志。\n");
-                  writer1.write("本次monkey结束，未发生崩溃，请查看日志。\n");
+                  log_writer.write("本次monkey结束，未发生崩溃，请查看日志。\n");
+                  crash_writer.write("本次monkey结束，未发生崩溃，请查看日志。\n");
                 }
               else {
             	  text.append("monkey发生未知错误，执行失败。\n");
               }
 
-              writer.close();
-              writer1.close();
+              log_writer.close();
+              crash_writer.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -263,13 +265,27 @@ public class Monkey {
     }
 	
 	public static void goBackIfWebViewOccored() throws IOException, InterruptedException{
-		while (true)
-	    {
-	      Check check = new Check();
-	      Thread ck = new Thread(check);
-	      ck.start();
-	      Thread.sleep(3000L);
-	    }
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true){
+					try
+					{
+						String currentActivity = Monkey_Menu.getFocusedPackageAndActivity();
+						if ((currentActivity.contains("WebViewUI")) || (currentActivity.contains("ShareableWebViewActivity")) || (currentActivity.contains("RealTradeWebView"))) {
+							ShellUtils.cmd("adb shell input keyevent 4");
+							System.out.println("执行返回");
+						}
+					}
+					catch (IndexOutOfBoundsException e)
+					{
+						e.printStackTrace();
+					}
+				}
+
+				}
+
+		});
 	}
 	
 	

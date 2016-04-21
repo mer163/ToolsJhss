@@ -282,7 +282,7 @@ public class Monkey_Menu extends JFrame
 							{
 								throttle="--throttle 2000";
 							}
-							if(devices.size()==0){
+							if(devices==null){
 								JOptionPane.showMessageDialog(frame1.getRootPane(), "请选择设备", "系统信息", JOptionPane.WARNING_MESSAGE);
 							}	
 							else if (Monkey.isMonkeyRunning(deviceName)){
@@ -410,8 +410,7 @@ public class Monkey_Menu extends JFrame
 	public static String getFocusedPackageAndActivity() throws IndexOutOfBoundsException{
 		Pattern pattern = Pattern.compile("([a-zA-Z0-9.]+/.[a-zA-Z0-9.]+)");
 		Process ps = ShellUtils.shell("dumpsys window w | grep \\/ | grep name=", deviceName);
-		ArrayList component = ReUtils.matchString(pattern, 
-		ShellUtils.getShellOut(ps));
+		ArrayList component = ReUtils.matchString(pattern, ShellUtils.getShellOut(ps));
 		return (String)component.get(0);
     }
 	
