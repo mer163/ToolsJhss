@@ -15,17 +15,17 @@ public class GetTop {
 		{
 		//System.out.println(GetRoson("Cpu"));
 		System.out.println(heap("com.jhss.youguu"));
-	
+		System.out.println(getPid("com.jhss.youguu"));
 		}
 		}
 
 	
-	  public static double cpu(String PackageName) throws IOException {
+	  public static double cpu(String packageName) throws IOException {
 		  double Cpu = 0;
 		  try{
 		   
 			Runtime runtime = Runtime.getRuntime();
-		    Process proc = runtime.exec("adb shell top -n 1| grep "+PackageName);
+		    Process proc = runtime.exec("adb shell top -n 1| grep "+packageName);
 		    try {
 		        if (proc.waitFor() != 0) {
 		            System.err.println("exit value = " + proc.exitValue());
@@ -73,14 +73,14 @@ public class GetTop {
 	  }
 	  
 	  
-	  public static double heap(String PackageName) throws IOException {
+	  public static double heap(String packageName) throws IOException {
 			 
 			
 		  double Heap = 0;
 	
 		   try{
 		    Runtime runtime = Runtime.getRuntime();
-		    Process proc = runtime.exec("adb shell dumpsys meminfo "+PackageName);
+		    Process proc = runtime.exec("adb shell dumpsys meminfo "+packageName);
 		    try {
 		        if (proc.waitFor() != 0) {
 		            System.err.println("exit value = " + proc.exitValue());
@@ -125,12 +125,12 @@ public class GetTop {
 	  
 	  
 	  //根据adb shell dumpsys meminfo +package 返回结果中的内容得到pid
-	  public static int getPid(String PackageName ){
+	  public static int getPid(String packageName ){
 		  int Pid = 0;
 			
 		   try{
 		    Runtime runtime = Runtime.getRuntime();
-		    Process proc = runtime.exec("adb shell dumpsys meminfo "+PackageName);
+		    Process proc = runtime.exec("adb shell dumpsys meminfo "+packageName);
 		    try {
 		        if (proc.waitFor() != 0) {
 		            System.err.println("exit value = " + proc.exitValue());
@@ -145,7 +145,7 @@ public class GetTop {
 		        }
 		        
 		        String str1=stringBuffer.toString();
-		        String str2=str1.substring(str1.indexOf("pid"),str1.indexOf("[com.jhss.youguu]"));
+		        String str2=str1.substring(str1.indexOf("pid"),str1.indexOf("[" + packageName + "]"));
 //		        System.out.println(str2);
 		        String  str3=str2.substring(4,str2.length());
 		        str3=str3.trim();

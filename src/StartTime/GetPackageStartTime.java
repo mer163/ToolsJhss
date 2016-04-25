@@ -30,8 +30,8 @@ public class GetPackageStartTime {
 		
 		String TalTime=GetPackageStartTime.Gettime(packageName,activityname,devicename);
 		Thread.sleep(3000);
-//		killpackage(packageName,devicename);
-		System.out.print(TalTime);
+		killpackage(packageName,devicename);
+//		System.out.print(TalTime);
         return TalTime;
 	}
 
