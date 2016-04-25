@@ -30,8 +30,8 @@ public class GetPackageStartTime {
 		
 		String TalTime=GetPackageStartTime.Gettime(packageName,activityname,devicename);
 		Thread.sleep(3000);
-		killpackage(packageName,devicename);
-//		System.out.print(TalTime);
+//		killpackage(packageName,devicename);
+		System.out.print(TalTime);
         return TalTime;
 	}
 
@@ -48,7 +48,8 @@ public class GetPackageStartTime {
 	 public static String Gettime(String packageName,String activityname, String devicename) throws IOException, InterruptedException {
 		  String time=null;
 		    Runtime runtime = Runtime.getRuntime();
-		    Process proc = runtime.exec("adb -s "+devicename+" shell am start -W -n "+packageName+"/"+activityname);
+		    String command = "adb -s "+devicename+" shell am start -W -n "+packageName+"/"+activityname;
+		    Process proc = runtime.exec(command);
 		    Thread.sleep(5000);
 		    try {
 		        if (proc.waitFor() != 0) {
@@ -63,8 +64,14 @@ public class GetPackageStartTime {
 		        }
 
 		    String str1=stringBuffer.toString();
-		    String[] temp = str1.split("TotalTime:");
-		    String[] temp1 = temp[1].split("Complete");
+		    String[] temp,temp1;
+		    temp = str1.split("TotalTime:");
+		    if(temp[1].contains("WaitTime:")){
+		    	temp1=temp[1].split("WaitTime:");
+		    }else{
+		    	temp1 = temp[1].split("Complete");
+		    }
+		   
 //		    System.out.println(temp1[0]);
 		    time = temp1[0].trim();
 
